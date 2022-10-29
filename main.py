@@ -1,7 +1,9 @@
+import json
 import requests
 from bs4 import BeautifulSoup
 
-PAGES_COUNT = 1
+PAGES_COUNT = 2
+OUT_FILENAME = 'out.json'
 
 def get_soup(url, **kwargs):
     response = requests.get(url, **kwargs)
@@ -66,6 +68,9 @@ def parse_products(urls):
 def main():
     urls = crawl_products(PAGES_COUNT)
     data = parse_products(urls)
+
+    with open(OUT_FILENAME, 'w') as f:
+        json.dump(data, f, ensure_ascii=False, indent=1)
 
 
 
