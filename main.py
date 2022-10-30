@@ -1,9 +1,43 @@
 import json
+import xlsxwriter
 import requests
 from bs4 import BeautifulSoup
 
-PAGES_COUNT = 2
+PAGES_COUNT = 1
 OUT_FILENAME = 'out.json'
+OUT_XLSX_FILENAME = 'out.xlsx'
+
+
+def dump_to_json(filename, data, **kwargs):
+    kwargs.setdefault('ensure_ascii', False)
+    kwargs.setdefault('indent', 1)
+
+    with open(OUT_FILENAME, 'w') as f:
+        json.dump(data, f, **kwargs)
+
+
+def dump_to_xlsx(filename, data):
+
+    with xlsxwriter.Workbook(filename) as workbook:
+        ws = workbook.add_worksheet()
+        bold = workbook.add_format({'bold': True})
+
+        headers = [' Имя', 'Город', 'Номер телефона']
+
+        for col, h in enumerate(headers):
+            ws.write_string(0, col, h, cell_format=bold)
+
+        for row, item in enumerate(data, start=1):
+            ws.write_string(row, 0, item['name'])
+            try:
+                ws.write_string(row, 1, item['city'])
+            except:
+                pass
+            try:
+                ws.write_string(row, 2, item['phone_number'])
+            except:
+                pass
+
 
 def get_soup(url, **kwargs):
     response = requests.get(url, **kwargs)
@@ -68,9 +102,9 @@ def parse_products(urls):
 def main():
     urls = crawl_products(PAGES_COUNT)
     data = parse_products(urls)
+    dump_to_json(OUT_FILENAME, data)
+    dump_to_xlsx(OUT_XLSX_FILENAME, data)
 
-    with open(OUT_FILENAME, 'w') as f:
-        json.dump(data, f, ensure_ascii=False, indent=1)
 
 
 
